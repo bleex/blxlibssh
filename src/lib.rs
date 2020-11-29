@@ -1,3 +1,7 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
 use libc::{c_int,c_char,c_void,c_uint};
 
 #[repr(C)]
@@ -5,13 +9,14 @@ use libc::{c_int,c_char,c_void,c_uint};
 pub struct ssh_session_struct {
     _unused: [u8; 0],
 }
-pub type ssh_session = *mut ssh_session_struct;
-pub type ssh_options_e = c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ssh_string_struct {
     _unused: [u8; 0],
 }
+pub type ssh_options_e = c_uint;
+pub type ssh_publickey_hash_type = c_uint;
+pub type ssh_session = *mut ssh_session_struct;
 
 pub const ssh_options_e_SSH_OPTIONS_HOST: ssh_options_e = 0;
 pub const ssh_options_e_SSH_OPTIONS_PORT: ssh_options_e = 1;
@@ -55,8 +60,19 @@ pub const ssh_options_e_SSH_OPTIONS_PROCESS_CONFIG: ssh_options_e = 38;
 pub const ssh_options_e_SSH_OPTIONS_REKEY_DATA: ssh_options_e = 39;
 pub const ssh_options_e_SSH_OPTIONS_REKEY_TIME: ssh_options_e = 40;
 
+pub const ssh_publickey_hash_type_SSH_PUBLICKEY_HASH_SHA1: ssh_publickey_hash_type = 0;
+pub const ssh_publickey_hash_type_SSH_PUBLICKEY_HASH_MD5: ssh_publickey_hash_type = 1;
+pub const ssh_publickey_hash_type_SSH_PUBLICKEY_HASH_SHA256: ssh_publickey_hash_type = 2;
+
 extern "C" {
+    pub fn ssh_connect(session: ssh_session) -> c_int;
+    pub fn ssh_disconnect(session: ssh_session);
     pub fn ssh_free(session: ssh_session);
+    pub fn ssh_get_disconnect_message(session: ssh_session) -> *const c_char;
+    pub fn ssh_get_error(error: *mut c_void) -> *const c_char;
+    pub fn ssh_get_error_code(error: *mut c_void) -> c_int;
+    pub fn ssh_get_issue_banner(session: ssh_session) -> *mut c_char;
+    pub fn ssh_get_openssh_version(session: ssh_session) -> c_int;
     pub fn ssh_new() -> ssh_session;
     pub fn ssh_options_copy(src: ssh_session, dest: *mut ssh_session) -> c_int;
     pub fn ssh_options_getopt(session: ssh_session, argcptr: *mut c_int, 
